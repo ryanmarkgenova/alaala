@@ -67,11 +67,47 @@ def metrics(ranked, rel):
     }
 
 
+def calibrate_found(data):
+    """Pick the confidence cutoff that best separates searches that have matches
+    from the ones you marked 'No matches' while labeling."""
+    import numpy as np
+    from search import FOUND_FILE
+
+    s = Searcher()
+    has = [q for q, v in data.get("labels", {}).items() if v and not s.culture.parse(q).persons]
+    none = [q for q in data.get("none", []) if not s.culture.parse(q).persons]
+    if not has or not none:
+        raise SystemExit("Need labeled queries with matches AND some marked 'No matches'.")
+    pos = {q: s.confidence(q) for q in has}
+    neg = {q: s.confidence(q) for q in none}
+    print("Confidence of the top match (z-score)\n")
+    print("Marked 'No matches':", ", ".join(f"{q} {z:.2f}" for q, z in sorted(neg.items(), key=lambda x: -x[1])))
+    print("Have matches:       ", ", ".join(f"{q} {z:.2f}" for q, z in sorted(pos.items(), key=lambda x: x[1])))
+    best = None
+    for cut in np.arange(1.5, 8.01, 0.05):
+        tpr = np.mean([z >= cut for z in pos.values()])   # real matches we still show as found
+        tnr = np.mean([z < cut for z in neg.values()])    # empty searches we correctly flag
+        bal = (tpr + tnr) / 2
+        if best is None or bal > best[1] + 1e-9:
+            best = (float(cut), bal, tpr, tnr)
+    cut, bal, tpr, tnr = best
+    if bal <= 0.6:
+        raise SystemExit(f"\nBest separation was only {bal:.0%} (coin flip is 50%), so keeping the default. "
+                         "Label more searches, including a few 'No matches' ones, and try again.")
+    FOUND_FILE.write_text(json.dumps({"z": round(cut, 2)}))
+    print(f"\nCutoff {cut:.2f}: flags {tnr:.0%} of empty searches, keeps {tpr:.0%} of real ones as found "
+          f"(balanced accuracy {bal:.0%}). Saved to {FOUND_FILE.name}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--labels")
     ap.add_argument("--out", default="dev", help="name for the saved report (dev or test)")
+    ap.add_argument("--found", action="store_true",
+                    help="calibrate the 'nothing found' cutoff from queries you marked No matches")
     args = ap.parse_args()
+    if args.found:
+        return calibrate_found(json.loads(find_labels(args.labels).read_text()))
 
     data = json.loads(find_labels(args.labels).read_text())
     labels = {q: set(v) for q, v in data.get("labels", {}).items() if v}

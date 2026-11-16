@@ -23,7 +23,9 @@ from common import DATA, EMB, EMB_IDS, INDEX, load_model
 from culture import Culture
 
 PERSON_BOOST = 0.10  # CLIP scores sit around 0.2-0.35, so this lifts linked people to the top
-KEEP_ORIGINAL = False  # v1 tied v2 on the dev set; known words are handled per term in lexicon.yaml
+KEEP_ORIGINAL = True  # v2: tied on dev, won on the held-out test set
+FOUND_FILE = DATA / "found_threshold.json"
+DEFAULT_FOUND_Z = 3.5  # replaced by `python eval.py --found`
 
 
 class Searcher:
@@ -46,6 +48,54 @@ class Searcher:
             f = f / f.norm(dim=-1, keepdim=True)
         v = f.float().cpu().numpy().mean(axis=0)
         return v / np.linalg.norm(v)
+
+    def confidence(self, query: str) -> float:
+        """How strongly the best photo stands out from the rest of the library
+        (z-score of the top match). Low means "probably not in your photos"."""
+        parsed = self.culture.parse(query, keep_original=KEEP_ORIGINAL)
+        raw = self.vecs @ self.encode_texts(parsed.variants)
+        return float(((raw - raw.mean()) / (raw.std() + 1e-9)).max())
+
+    def found_threshold(self) -> float:
+        import json
+        return json.loads(FOUND_FILE.read_text())["z"] if FOUND_FILE.exists() else DEFAULT_FOUND_Z
+
+    def assess(self, query: str, parsed) -> dict:
+        """Is the thing actually in the library? If not, suggest nearby searches that are."""
+        if parsed and parsed.persons:  # linked family members: definitely there
+            return {"found": True, "confidence": None, "similar": []}
+        conf = self.confidence(query)
+        cut = self.found_threshold()
+        if conf >= cut:
+            return {"found": True, "confidence": round(conf, 2), "similar": []}
+        return {"found": False, "confidence": round(conf, 2), "similar": self.similar_terms(query, cut)}
+
+    def similar_terms(self, query: str, cut: float, n: int = 4) -> list[str]:
+        """Lexicon words that mean something close to the query AND exist in this library."""
+        if not hasattr(self, "_term_vecs"):
+            terms, seen = [], set()
+            for term, phrases in self.culture.lexicon.items():
+                sig = tuple(phrases or [])
+                if sig not in seen and term not in self.culture.kin:
+                    seen.add(sig)
+                    terms.append(term)
+            self._terms = terms
+            self._term_vecs = np.stack([self.encode_texts(self.culture.lexicon[t]) for t in terms])
+            self._term_conf = {}
+        own = set(self.culture.parse(query).terms)
+        q = self.encode_texts(self.culture.parse(query, keep_original=KEEP_ORIGINAL).variants)
+        out = []
+        for i in np.argsort(-(self._term_vecs @ q)):
+            t = self._terms[i]
+            if t in own:
+                continue
+            if t not in self._term_conf:
+                self._term_conf[t] = self.confidence(t)
+            if self._term_conf[t] >= cut:
+                out.append(t)
+            if len(out) == n:
+                break
+        return out
 
     def _has_any(self, people: set[str]) -> np.ndarray:
         return self.meta.persons.apply(lambda ps: bool(people & set(ps))).to_numpy()
@@ -166,6 +216,10 @@ def run(s, args, query):
         res, parsed = s.search(query, baseline=args.baseline, **kw)
         if parsed:
             print(parsed.explain())
+            a = s.assess(query, parsed)
+            if not a["found"]:
+                print(f"  No {query} found in your photos. Closest matches below."
+                      + (f" Try: {', '.join(a['similar'])}" if a["similar"] else ""))
         sections = [("Baseline" if args.baseline else "Alaala", res)]
     if res.empty:
         print("No results (check your filters)")

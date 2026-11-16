@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/cover_dark.png">
+  <img alt="alaala. search your photos the way you talk" src="docs/cover_light.png">
+</picture>
+
 # Alaala
 
 **Culture-aware photo search for Filipino families.** Search your photo library the way you actually talk: "lolo," "halo-halo," "lola sa beach."

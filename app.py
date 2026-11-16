@@ -98,9 +98,10 @@ class Handler(BaseHTTPRequestHandler):
             with model_lock:
                 res, parsed = s.search(query, k=48)
                 base = s.search(query, k=48, baseline=True)[0] if compare else None
+                verdict = s.assess(query, parsed)
             return self._json({
                 "query": query, "notes": parsed.notes, "variants": parsed.variants,
-                "terms": parsed.terms, "results": rows(res),
+                "terms": parsed.terms, "results": rows(res), **verdict,
                 "baseline": rows(base) if base is not None else None,
             })
         if url.path.startswith("/thumb/"):
