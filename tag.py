@@ -32,10 +32,12 @@ MAX_PER_TERM = 40
 MARKER = "Alaala"
 
 
-def zscores(s: Searcher, term: str) -> np.ndarray:
-    """Score every photo for a term, normalized so one cutoff works for all terms."""
-    variants = s.culture.parse(term, keep_original=KEEP_ORIGINAL).variants
-    raw = s.vecs @ s.encode_texts(variants)
+def zscores(s: Searcher, term: str, learned: bool = True) -> np.ndarray:
+    """Score every photo for a term, normalized so one cutoff works for all terms.
+    Uses what Alaala has learned from your feedback, when it has learned something."""
+    raw = s.raw_scores(term)
+    if learned:
+        raw, _ = s.learner.blend(term, raw)
     return (raw - raw.mean()) / (raw.std() + 1e-9)
 
 
@@ -93,9 +95,9 @@ def calibrate(s: Searcher, target=0.85, pool=20):
         if norm(q) in terms and rel:
             seen = set()
             for base in (True, False):  # rebuild the pool you labeled from
-                res, _ = s.search(q, k=pool, baseline=base)
+                res, _ = s.search(q, k=pool, baseline=base, learned=False)
                 seen |= set(res.uuid)
-            rows.append((zscores(s, norm(q)), np.isin(ids, list(rel)), np.isin(ids, list(seen))))
+            rows.append((zscores(s, norm(q), learned=False), np.isin(ids, list(rel)), np.isin(ids, list(seen))))
     if not rows:
         sys.exit("None of your labeled queries are single lexicon words; can't calibrate.")
     print(f"Calibrating on {len(rows)} labeled food/thing words (only photos you reviewed)\n")

@@ -74,8 +74,26 @@
   .meta { position: absolute; inset: auto 0 0 0; padding: 18px 9px 7px; color: #fff; font-size: 11.5px; line-height: 1.3;
           background: linear-gradient(transparent, rgba(0,0,0,.6)); opacity: 0; transition: opacity .15s; }
   .card:hover .meta { opacity: 1; }
-  .open { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.45); color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 7px; opacity: 0; }
-  .card:hover .open { opacity: 1; }
+  .acts { position: absolute; top: 8px; right: 8px; display: flex; gap: 5px; opacity: 0; transition: opacity .12s; }
+  .card:hover .acts { opacity: 1; }
+  .acts button { background: rgba(0,0,0,.5); color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 7px; }
+  .acts button:hover { background: rgba(0,0,0,.75); }
+  .card.nope { opacity: .28; filter: grayscale(1); }
+  .card.nope::after { content: "Not a match"; position: absolute; inset: 0; display: grid; place-items: center; color: #fff; font-size: 12px; font-weight: 600; }
+  .teachlink { background: none; color: var(--accent); padding: 0; font-size: 13px; font-weight: 600; margin-left: 6px; }
+  .teachlink:hover { text-decoration: underline; }
+  .teachhead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin: 0 0 6px; }
+  .teachhead h2 { margin: 0; font: 500 30px/1.1 "New York", "Iowan Old Style", Georgia, serif; letter-spacing: -.01em; }
+  .teachhead p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  .meter { height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; margin: 12px 0 18px; max-width: 420px; }
+  .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; }
+  .ans { position: absolute; inset: auto 8px 8px 8px; display: flex; gap: 6px; }
+  .ans button { flex: 1; padding: 7px 0; border-radius: 8px; font-weight: 600; font-size: 13px; background: rgba(0,0,0,.55); color: #fff; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .ans button:hover { background: rgba(0,0,0,.8); }
+  .card.yes { outline-color: var(--ok); } .card.no { opacity: .35; filter: grayscale(1); }
+  .card.yes .ans, .card.no .ans { display: none; }
+  .teachbar { display: flex; gap: 10px; margin-top: 18px; }
+  .ghostbtn { background: var(--panel); border: 1px solid var(--line); color: var(--ink); padding: 10px 16px; }
   .empty, .loading { text-align: center; color: var(--muted); padding: 80px 20px; }
   .loading .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin: 0 3px; animation: b 1s infinite ease-in-out; }
   .loading .dot:nth-child(2) { animation-delay: .15s; } .loading .dot:nth-child(3) { animation-delay: .3s; }
@@ -144,11 +162,17 @@ function card(r, pickable) {
   const d = document.createElement("div");
   d.className = "card" + (pickable ? " pick" : "") + (sel.has(r.uuid) && pickable ? " on" : "");
   d.innerHTML = `<img src="/thumb/${r.uuid}" loading="lazy" onload="this.classList.add('loaded')">
-    ${pickable ? '<span class="check">✓</span>' : ""}<button class="open" title="Show in Photos">Photos ↗</button>
+    ${pickable ? '<span class="check">✓</span>' : ""}<div class="acts">${pickable ? '<button class="no" title="Teach Alaala this is not a match">✕ Not this</button>' : ""}<button class="open" title="Show in Photos">Photos ↗</button></div>
     <div class="meta">${esc(r.date)}${r.persons.length ? "<br>" + esc(r.persons.join(", ")) : ""}</div>`;
   d.querySelector(".open").onclick = async e => {
     e.stopPropagation();
     try { await api("/api/show", {uuid: r.uuid}); } catch (err) { toast(err.message, "err"); }
+  };
+  const no = d.querySelector(".no");
+  if (no) no.onclick = async e => {
+    e.stopPropagation(); d.classList.add("nope"); sel.delete(r.uuid); d.classList.remove("on"); bar();
+    try { const st = await api("/api/feedback", {query: last.query, uuid: r.uuid, label: 0}); last.teach = st; teachLine(); }
+    catch (err) { toast(err.message, "err"); }
   };
   if (pickable) d.onclick = () => { sel.has(r.uuid) ? sel.delete(r.uuid) : sel.add(r.uuid); d.classList.toggle("on"); bar(); };
   return d;
@@ -182,7 +206,52 @@ function render() {
   last.notes.forEach(n => bits.push(esc(n.replace(/^.*? -> /, ""))));
   if (last.terms.length) bits.push("looks for “" + esc(last.variants[0]) + "”");
   $("und").innerHTML = bits.join(" · ");
+  teachLine();
   $("foot").hidden = false;
+}
+function teachLine() {
+  const t = last.teach; if (!t) return;
+  const old = document.getElementById("tl"); if (old) old.remove();
+  const span = document.createElement("span"); span.id = "tl";
+  const status = t.trained ? `learned from ${t.yes} yes · ${t.no} no` : (t.yes ? `${t.needed} more yes to start learning` : "");
+  span.innerHTML = ` ${$("und").innerHTML ? "·" : ""} <button class="teachlink">Teach Alaala about “${esc(last.query)}” →</button>` +
+    (status ? ` <span style="opacity:.7">(${status})</span>` : "");
+  span.querySelector("button").onclick = () => teach(last.query);
+  $("und").appendChild(span);
+}
+async function teach(q) {
+  sel.clear(); bar();
+  $("out").innerHTML = '<div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+  let d;
+  try { d = await api(`/api/teach?q=${encodeURIComponent(q)}`); } catch (e) { return toast(e.message, "err"); }
+  const st = d.stats, pct = Math.round(st.trust * 100);
+  const msg = st.trained ? `Learned from ${st.yes} yes and ${st.no} no. Trusting what it learned ${pct}%.`
+    : `${st.needed} more “yes” answers and Alaala starts learning “${esc(q)}”.`;
+  $("und").innerHTML = "";
+  $("out").innerHTML = `<div class="teachhead"><h2>Is this “${esc(q)}”?</h2><p id="tmsg">${msg}</p></div>
+    <div class="meter"><i style="width:${Math.max(4, pct)}%"></i></div>
+    <p style="color:var(--muted);font-size:13px;margin:0 0 14px">${st.trained ? "These are the photos it's least sure about. Your answers help the most here." : "Confirm the ones that match."}</p>
+    <div class="grid" id="tgrid"></div>
+    <div class="teachbar"><button class="primary" id="tnext">Next batch</button><button class="ghostbtn" id="tdone">Done, show results</button></div>`;
+  const g = $("tgrid");
+  if (!d.photos.length) g.innerHTML = '<p class="empty">Nothing left to ask about. Nice.</p>';
+  d.photos.forEach(r => {
+    const c = document.createElement("div"); c.className = "card";
+    c.innerHTML = `<img src="/thumb/${r.uuid}" loading="lazy" onload="this.classList.add('loaded')">
+      <div class="ans"><button data-v="1">✓ Yes</button><button data-v="0">✕ No</button></div>`;
+    c.querySelectorAll(".ans button").forEach(b => b.onclick = async () => {
+      const v = +b.dataset.v; c.classList.add(v ? "yes" : "no");
+      try {
+        const s2 = await api("/api/feedback", {query: q, uuid: r.uuid, label: v, source: "teach"});
+        $("tmsg").textContent = s2.trained ? `Learned from ${s2.yes} yes and ${s2.no} no. Trusting what it learned ${Math.round(s2.trust * 100)}%.`
+          : `${s2.needed} more “yes” answers and Alaala starts learning “${q}”.`;
+        document.querySelector(".meter i").style.width = Math.max(4, Math.round(s2.trust * 100)) + "%";
+      } catch (e) { toast(e.message, "err"); }
+    });
+    g.appendChild(c);
+  });
+  $("tnext").onclick = () => teach(q);
+  $("tdone").onclick = () => search(q);
 }
 function bar() {
   $("nsel").textContent = `${sel.size} selected`;
@@ -206,7 +275,7 @@ $("tagbtn").onclick = async () => {
   const kw = $("kw").value.trim(); if (!kw) return toast("Add a keyword first", "err");
   $("tagbtn").disabled = true; $("tagbtn").textContent = "Tagging…";
   try {
-    const r = await api("/api/tag", {keyword: kw, uuids: [...sel]});
+    const r = await api("/api/tag", {keyword: kw, uuids: [...sel], query: last.query});
     toast(`Tagged ${r.tagged} photo${r.tagged === 1 ? "" : "s"} as “${r.keyword}”. Search it in Photos!`);
     $("clr").click();
   } catch (e) { toast(e.message, "err"); }

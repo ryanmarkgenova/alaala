@@ -39,6 +39,9 @@ class Searcher:
         self.mmdd = day.str[5:].to_numpy()
         self.names = Counter(n for ps in self.meta.persons for n in ps)
         self.culture = Culture(list(self.names))
+        from learn import Learner
+
+        self.learner = Learner(self.vecs, ids)  # your yes/no feedback + learned models
 
     def encode_texts(self, texts: list[str]) -> np.ndarray:
         """Embed one or more phrasings and average them (prompt ensemble)."""
@@ -105,15 +108,26 @@ class Searcher:
             return (self.mmdd >= start) & (self.mmdd <= end)
         return (self.mmdd >= start) | (self.mmdd <= end)  # wraps new year
 
+    def raw_scores(self, query, keep_original=None):
+        """Culture-aware similarity for every photo, before learning or boosts."""
+        keep = KEEP_ORIGINAL if keep_original is None else keep_original
+        return self.vecs @ self.encode_texts(self.culture.parse(query, keep_original=keep).variants)
+
     def search(self, query, k=24, baseline=False, persons=None, year=None, videos=None,
-               keep_original=None):
+               keep_original=None, learned=True):
         parsed = None
+        self.last_learned = None
         if baseline:
             scores = self.vecs @ self.encode_texts([query])
         else:
             keep = KEEP_ORIGINAL if keep_original is None else keep_original
             parsed = self.culture.parse(query, keep_original=keep)
             scores = self.vecs @ self.encode_texts(parsed.variants)
+            if learned:
+                scores, info = self.learner.blend(query, scores)
+                if info:
+                    self.last_learned = info
+                    parsed.notes.append(f"learned from {info['examples']} of your examples")
             if parsed.persons:
                 scores = scores + PERSON_BOOST * self._has_any(parsed.persons)
 

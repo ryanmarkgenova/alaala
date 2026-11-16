@@ -99,11 +99,26 @@ class Handler(BaseHTTPRequestHandler):
                 res, parsed = s.search(query, k=48)
                 base = s.search(query, k=48, baseline=True)[0] if compare else None
                 verdict = s.assess(query, parsed)
+                learned = s.last_learned
+                teach = s.learner.stats(query)
             return self._json({
                 "query": query, "notes": parsed.notes, "variants": parsed.variants,
                 "terms": parsed.terms, "results": rows(res), **verdict,
+                "learned": learned, "teach": teach,
                 "baseline": rows(base) if base is not None else None,
             })
+        if url.path == "/api/teach":
+            s = state["s"]
+            if s is None:
+                return self._json({"error": "Still loading"}, 503)
+            query = (q.get("q") or [""])[0].strip()
+            if not query:
+                return self._json({"error": "Empty search"}, 400)
+            with model_lock:
+                idx = s.learner.candidates(query, s.raw_scores(query), n=12)
+                picks = s.meta.iloc[idx].copy()
+                picks["score"] = 0.0
+            return self._json({"query": query, "photos": rows(picks), "stats": s.learner.stats(query)})
         if url.path.startswith("/thumb/"):
             uuid = url.path.rsplit("/", 1)[-1]
             data = make_thumb(uuid) if UUID_RE.match(uuid) else None
@@ -118,6 +133,14 @@ class Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
         except json.JSONDecodeError:
             return self._json({"error": "Bad request"}, 400)
+        if url.path == "/api/feedback":
+            s = state["s"]
+            query, uuid = str(body.get("query", "")).strip(), str(body.get("uuid", ""))
+            if s is None or not query or not UUID_RE.match(uuid) or body.get("label") not in (0, 1):
+                return self._json({"error": "Bad feedback"}, 400)
+            with model_lock:
+                stats = s.learner.record(query, uuid, body["label"], source=str(body.get("source", "app")))
+            return self._json(stats)
         try:
             import tag
 
@@ -127,6 +150,13 @@ class Handler(BaseHTTPRequestHandler):
                 if not kw or not ids:
                     return self._json({"error": "Pick photos and a keyword"}, 400)
                 tagged, missing = tag.write_tags({kw: ids}, progress=False)
+                s = state["s"]
+                query = str(body.get("query", "")).strip()
+                if s is not None and query:  # tagging is also a "yes" Alaala learns from
+                    with model_lock:
+                        for u in ids:
+                            s.learner.fb.add(query, u, 1, "tag")
+                        s.learner.train(query)
                 return self._json({"tagged": tagged, "missing": missing, "keyword": kw})
             if url.path == "/api/undo":
                 return self._json({"removed": tag.remove_tags()})

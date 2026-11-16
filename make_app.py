@@ -70,17 +70,20 @@ def draw_icon(png_path):
     img.save(png_path)
 
 
-def make_icns(dest):
-    """Build AppIcon.icns with macOS's iconutil. Skipped quietly if unavailable."""
+def make_icns(dest, style="light"):
+    """Build AppIcon.icns with macOS's iconutil. Uses the wordmark icon in assets/,
+    falling back to a drawn one. Skipped quietly if iconutil is unavailable."""
     if not shutil.which("iconutil"):
         return False
     from PIL import Image
 
     work = DATA / "AppIcon.iconset"
     work.mkdir(parents=True, exist_ok=True)
-    base = DATA / "icon_1024.png"
-    draw_icon(base)
-    src = Image.open(base)
+    base = ROOT / "assets" / f"icon_{style}.png"
+    if not base.exists():
+        base = DATA / "icon_1024.png"
+        draw_icon(base)
+    src = Image.open(base).convert("RGBA")
     for size in (16, 32, 128, 256, 512):
         src.resize((size, size), Image.LANCZOS).save(work / f"icon_{size}x{size}.png")
         src.resize((size * 2, size * 2), Image.LANCZOS).save(work / f"icon_{size}x{size}@2x.png")
@@ -89,7 +92,7 @@ def make_icns(dest):
     return ok
 
 
-def build_app():
+def build_app(icon="light"):
     python = ROOT / ".venv" / "bin" / "python"
     if not python.exists():
         python = sys.executable  # fall back to whatever ran this script
@@ -119,7 +122,7 @@ exec "{python}" "{ROOT / 'app.py'}" >> "{DATA / 'app.log'}" 2>&1
         "NSAppleEventsUsageDescription":
             "Alaala adds keywords to photos you choose, so the Photos search can find them.",
     }
-    if make_icns(res / "AppIcon.icns"):
+    if make_icns(res / "AppIcon.icns", icon):
         info["CFBundleIconFile"] = "AppIcon"
     with open(APP / "Contents" / "Info.plist", "wb") as f:
         plistlib.dump(info, f)
@@ -127,6 +130,11 @@ exec "{python}" "{ROOT / 'app.py'}" >> "{DATA / 'app.log'}" 2>&1
 
 
 def main():
+    import argparse
+
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--icon", choices=["light", "dark"], default="light")
+    args = ap.parse_args()
     if not INDEX.exists():
         sys.exit("Run ingest.py and embed.py first.")
     try:
@@ -134,7 +142,9 @@ def main():
     except ImportError:
         print("Tip: `uv pip install pywebview` for a real app window (otherwise it opens in your browser).")
     cache_thumbs()
-    build_app()
+    build_app(args.icon)
+    if sys.platform == "darwin":
+        APP.touch()  # nudge Finder/Dock to pick up a new icon
     print("\nDouble-click Alaala.app in Finder, or drag it to your Dock.")
     if sys.platform == "darwin":
         subprocess.run(["open", "-R", str(APP)])  # reveal it in Finder

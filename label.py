@@ -41,7 +41,7 @@ def main():
     pools, thumbs = {}, {}
     for q in queries:
         base, _ = s.search(q, k=POOL, baseline=True)
-        cult, _ = s.search(q, k=POOL)
+        cult, _ = s.search(q, k=POOL, learned=False)  # neutral pool for fair labeling
         ids = list(dict.fromkeys(list(base.uuid) + list(cult.uuid)))
         ids.sort(key=lambda u: by_uuid.at[u, "date"])  # blind: order by date, not score
         pools[q] = ids

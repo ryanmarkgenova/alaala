@@ -27,8 +27,8 @@ from search import Searcher
 K = 10
 METHODS = {  # name -> search() options. This is the ablation table.
     "Baseline (plain CLIP)": dict(baseline=True),
-    "Alaala v1 (descriptions only)": dict(keep_original=False),
-    "Alaala v2 (+ original word)": dict(keep_original=True),
+    "Alaala v1 (descriptions only)": dict(keep_original=False, learned=False),
+    "Alaala v2 (+ original word)": dict(keep_original=True, learned=False),
 }
 
 
@@ -118,7 +118,7 @@ def main():
     for q, rel in labels.items():
         kind = "Filipino term" if s.culture.parse(q).terms else "English"
         for name, opts in METHODS.items():
-            res, _ = s.search(q, k=50, **opts)
+            res, _ = s.search(q, k=50, **opts)  # learned models off: keeps the test honest
             rows.append({"query": q, "type": kind, "method": name, **metrics(list(res.uuid), rel)})
     df = pd.DataFrame(rows)
 

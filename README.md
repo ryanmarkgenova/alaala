@@ -71,6 +71,19 @@ I wrote and labeled the queries from my own library (434 photos and videos). Eac
 
 One family's library, one annotator, small query sets (29 dev, 14 test), and labels pooled from the top 20 of each method (so recall is relative to what either method found). Treat the numbers as a strong signal, not a benchmark.
 
+## It learns from you
+
+Alaala starts with zero-shot search, then learns your family's version of things:
+
+- **Every answer is training data.** "✕ Not this" on a result, Yes/No in **Teach** mode, and every "Tag in Photos" are saved to a local SQLite database.
+- **A small model per search.** After 3 yeses, Alaala trains a logistic regression on the photo embeddings for that search (a linear probe) and blends it with the zero-shot score. Its trust in the learned model grows with the evidence: `trust = examples / (examples + 8)`.
+- **It asks smart questions.** Teach mode shows the photos the model is *least sure about* (uncertainty sampling, a form of active learning), so each answer teaches it the most.
+- **Measured, not assumed.** `learn.py --curve` hides some confirmed photos, trains on the rest, and measures how well the hidden ones are found as examples increase. It's a paired comparison: at each step, learned and zero-shot are scored on the *same* searches and the *same* hidden photos, because searches with many examples may simply be easier:
+
+![Learning curve](docs/learning_curve.png)
+
+The eval in **Results** runs with learned models off, so the held-out test numbers stay honest.
+
 ## How it relates to Apple Photos
 
 Alaala is a **separate search tool** that reads your Apple Photos library. It doesn't change what the search bar inside the Photos app returns. You search in Alaala, and it shows you the matching photos.
@@ -102,6 +115,11 @@ python tag.py                   # review proposed tags, then "Save approved tags
 python tag.py --apply           # writes keywords (Photos open on the same library)
 python tag.py --undo            # removes everything Alaala added
 
+# learning from feedback
+python learn.py --seed          # turn your dev labels into training examples
+python learn.py --curve         # learning curve chart (docs/learning_curve.png)
+python learn.py --stats         # what it has learned so far
+
 # evaluation
 python label.py                 # click the correct photos per query
 python eval.py --out dev
@@ -115,7 +133,8 @@ Photos, embeddings, names, and labels stay in `data/` and are git-ignored. Your 
 
 ## Roadmap
 
-- Mac app with a search box and a "Tag in Photos" button (no Terminal)
+- Filipino word bank from an open dictionary, with AI-drafted visual descriptions you approve
+- On-device captions for every photo (MobileCLIP2 CoCa)
 - Public demo with openly licensed photos
 - Audio for videos (detecting actual singing at a videoke)
 - More cultures: halmeoni, abuela, bà
