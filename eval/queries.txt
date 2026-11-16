@@ -1,0 +1,37 @@
+# One search per line. Lines starting with # are ignored.
+halo-halo
+ensemada
+lolo
+lola
+tita
+tito
+kuya
+ate
+pagkain
+taho
+ice cream
+bibingka
+sisig
+buffet
+inasal
+fruitas
+lumpia
+lechon
+kanin
+pamilya
+lola sa beach
+lolo smiling
+cousins
+kakanin
+leche flan
+jolibee
+puto
+ube
+cheese
+sinigang
+bangus
+tocino
+red hotdog
+fried rice
+beach
+swimming

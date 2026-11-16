@@ -1,0 +1,16 @@
+# Personal data: never commit
+data/
+*.photoslibrary/
+labels*.json
+
+# Your family's names (the repo ships config/kinship.example.yaml instead)
+config/kinship.yaml
+
+# Built locally by make_app.py (has paths specific to your Mac)
+Alaala.app/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

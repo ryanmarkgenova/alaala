@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alaala</title>
+<style>
+  :root {
+    --bg: #f7f3ec; --panel: #fffdf9; --ink: #1f1b16; --muted: #7a7066; --line: #e7dfd3;
+    --accent: #c2410c; --accent-soft: #fbe6d9; --ok: #15803d; --shadow: 0 1px 2px rgba(31,27,22,.06), 0 8px 24px rgba(31,27,22,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #151311; --panel: #1d1a17; --ink: #f2ece4; --muted: #a39887; --line: #2e2924;
+            --accent: #f97316; --accent-soft: #3a2416; --ok: #4ade80; --shadow: none; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+         background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  header { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent);
+           backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .bar { max-width: 1400px; margin: 0 auto; padding: 18px 28px 14px; }
+  .brand { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+  .brand b { font: 600 22px/1 "New York", "Iowan Old Style", Georgia, serif; letter-spacing: -.01em; }
+  .brand span { color: var(--muted); font-size: 13px; }
+  form { display: flex; gap: 10px; align-items: center; }
+  .search { flex: 1; display: flex; align-items: center; gap: 10px; background: var(--panel);
+            border: 1px solid var(--line); border-radius: 12px; padding: 0 14px; box-shadow: var(--shadow); }
+  .search:focus-within { border-color: var(--accent); }
+  .search svg { flex: none; opacity: .5; }
+  input[type=search] { flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink);
+                       font: inherit; font-size: 17px; padding: 13px 0; }
+  .toggle { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; cursor: pointer; user-select: none; white-space: nowrap; }
+  .toggle input { display: none; }
+  .switch { width: 34px; height: 20px; border-radius: 10px; background: var(--line); position: relative; transition: background .15s; }
+  .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .toggle input:checked + .switch { background: var(--accent); }
+  .toggle input:checked + .switch::after { transform: translateX(14px); }
+  button { font: inherit; cursor: pointer; border: 0; border-radius: 10px; }
+  .primary { background: var(--accent); color: #fff; padding: 12px 20px; font-weight: 600; }
+  .primary:disabled { opacity: .45; cursor: default; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+  .chips small { color: var(--muted); margin-right: 2px; }
+  .chip { background: var(--panel); border: 1px solid var(--line); color: var(--ink); padding: 5px 12px; border-radius: 999px; font-size: 13px; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  main { max-width: 1400px; margin: 0 auto; padding: 18px 28px 120px; }
+  .understood { color: var(--muted); font-size: 13px; margin: 0 0 16px; min-height: 18px; }
+  .understood em { font-style: normal; color: var(--ink); background: var(--accent-soft); padding: 1px 6px; border-radius: 5px; }
+  .cols { display: grid; gap: 28px; }
+  .cols.two { grid-template-columns: 1fr 1fr; }
+  h3 { margin: 0 0 10px; font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+  h3.mine { color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+  .two .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+  .card { position: relative; border-radius: 12px; overflow: hidden; background: var(--line); aspect-ratio: 1;
+          box-shadow: var(--shadow); outline: 3px solid transparent; outline-offset: -3px; transition: outline-color .1s, transform .1s; }
+  .card img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .25s; }
+  .card img.loaded { opacity: 1; }
+  .card.pick { cursor: pointer; }
+  .card.pick:hover { transform: translateY(-1px); }
+  .card.on { outline-color: var(--accent); }
+  .check { position: absolute; top: 8px; left: 8px; width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff;
+           background: rgba(0,0,0,.25); display: none; align-items: center; justify-content: center; color: #fff; font-size: 13px; }
+  .card.pick:hover .check, .card.on .check { display: flex; }
+  .card.on .check { background: var(--accent); border-color: var(--accent); }
+  .meta { position: absolute; inset: auto 0 0 0; padding: 18px 9px 7px; color: #fff; font-size: 11.5px; line-height: 1.3;
+          background: linear-gradient(transparent, rgba(0,0,0,.6)); opacity: 0; transition: opacity .15s; }
+  .card:hover .meta { opacity: 1; }
+  .open { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.45); color: #fff; font-size: 11px; padding: 4px 8px; border-radius: 7px; opacity: 0; }
+  .card:hover .open { opacity: 1; }
+  .empty, .loading { text-align: center; color: var(--muted); padding: 80px 20px; }
+  .loading .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin: 0 3px; animation: b 1s infinite ease-in-out; }
+  .loading .dot:nth-child(2) { animation-delay: .15s; } .loading .dot:nth-child(3) { animation-delay: .3s; }
+  @keyframes b { 0%, 80%, 100% { transform: scale(.5); opacity: .4; } 40% { transform: scale(1); opacity: 1; } }
+  .tagbar { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 160px); opacity: 0; pointer-events: none; transition: transform .2s ease, opacity .2s;
+            background: var(--ink); color: var(--bg); border-radius: 14px; padding: 10px 10px 10px 18px; display: flex; gap: 10px;
+            align-items: center; box-shadow: 0 12px 40px rgba(0,0,0,.25); z-index: 20; white-space: nowrap; }
+  .tagbar.show { transform: translate(-50%, 0); opacity: 1; pointer-events: auto; }
+  .tagbar input { background: transparent; border: 1px solid color-mix(in srgb, var(--bg) 35%, transparent); color: var(--bg);
+                  border-radius: 8px; padding: 7px 10px; font: inherit; width: 160px; }
+  .tagbar .ghost { background: transparent; color: color-mix(in srgb, var(--bg) 70%, transparent); padding: 8px 10px; }
+  .toast { position: fixed; top: 18px; left: 50%; transform: translate(-50%, -120px); opacity: 0; background: var(--panel); color: var(--ink);
+           border: 1px solid var(--line); border-radius: 12px; padding: 10px 16px; box-shadow: var(--shadow); transition: transform .2s, opacity .2s; z-index: 30; }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  .toast.ok { border-color: var(--ok); } .toast.err { border-color: var(--accent); }
+  footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 40px; }
+  footer button { background: none; color: var(--muted); text-decoration: underline; padding: 0; }
+</style>
+
+<header><div class="bar">
+  <div class="brand"><b>alaala</b><span>search your photos the way you talk</span><span id="count"></span></div>
+  <form id="f">
+    <label class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Try “lolo”, “halo-halo”, “lola sa beach”…" autocomplete="off" autofocus>
+    </label>
+    <label class="toggle" title="Show plain AI search next to Alaala"><input id="cmp" type="checkbox"><span class="switch"></span>Compare</label>
+    <button class="primary" id="go" disabled>Search</button>
+  </form>
+  <div class="chips" id="chips"></div>
+</div></header>
+
+<main>
+  <p class="understood" id="und"></p>
+  <div id="out"><div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span><p>Waking up the model…</p></div></div>
+  <footer id="foot" hidden>Tags are added as Photos keywords, plus “Alaala” so you can find them all. <button id="undo">Undo all Alaala tags</button></footer>
+</main>
+
+<div class="tagbar" id="tagbar">
+  <span id="nsel">0 selected</span>
+  <span style="opacity:.6">Tag as</span><input id="kw">
+  <button class="primary" id="tagbtn">Tag in Photos</button>
+  <button class="ghost" id="all">Select all</button><button class="ghost" id="clr">Clear</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const sel = new Set();
+let last = null;
+
+function toast(msg, kind = "ok") {
+  const t = $("toast"); t.textContent = msg; t.className = "toast show " + kind;
+  clearTimeout(t._h); t._h = setTimeout(() => t.className = "toast", 3200);
+}
+async function api(path, body) {
+  const r = await fetch(path, body ? {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)} : {});
+  const j = await r.json().catch(() => ({error: "Something went wrong"}));
+  if (!r.ok || j.error) throw new Error(j.error || "Something went wrong");
+  return j;
+}
+function esc(s) { return String(s).replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c])); }
+
+function card(r, pickable) {
+  const d = document.createElement("div");
+  d.className = "card" + (pickable ? " pick" : "") + (sel.has(r.uuid) && pickable ? " on" : "");
+  d.innerHTML = `<img src="/thumb/${r.uuid}" loading="lazy" onload="this.classList.add('loaded')">
+    ${pickable ? '<span class="check">✓</span>' : ""}<button class="open" title="Show in Photos">Photos ↗</button>
+    <div class="meta">${esc(r.date)}${r.persons.length ? "<br>" + esc(r.persons.join(", ")) : ""}</div>`;
+  d.querySelector(".open").onclick = async e => {
+    e.stopPropagation();
+    try { await api("/api/show", {uuid: r.uuid}); } catch (err) { toast(err.message, "err"); }
+  };
+  if (pickable) d.onclick = () => { sel.has(r.uuid) ? sel.delete(r.uuid) : sel.add(r.uuid); d.classList.toggle("on"); bar(); };
+  return d;
+}
+function column(title, list, mine) {
+  const c = document.createElement("section");
+  c.innerHTML = `<h3 class="${mine ? "mine" : ""}">${title}</h3>`;
+  const g = document.createElement("div"); g.className = "grid";
+  list.forEach(r => g.appendChild(card(r, mine)));
+  if (!list.length) g.innerHTML = '<p class="empty">No matches</p>';
+  c.appendChild(g); return c;
+}
+function render() {
+  const out = $("out"); out.innerHTML = "";
+  const wrap = document.createElement("div");
+  wrap.className = "cols" + (last.baseline ? " two" : "");
+  if (last.baseline) wrap.appendChild(column("Plain search", last.baseline, false));
+  wrap.appendChild(column(last.baseline ? "Alaala" : `Results for “${esc(last.query)}”`, last.results, true));
+  out.appendChild(wrap);
+  const bits = [];
+  if (last.terms.length) bits.push(`Understood <em>${last.terms.map(esc).join("</em> <em>")}</em>`);
+  last.notes.forEach(n => bits.push(esc(n.replace(/^.*? -> /, ""))));
+  if (last.terms.length) bits.push("looks for “" + esc(last.variants[0]) + "”");
+  $("und").innerHTML = bits.join(" · ");
+  $("foot").hidden = false;
+}
+function bar() {
+  $("nsel").textContent = `${sel.size} selected`;
+  $("tagbar").classList.toggle("show", sel.size > 0);
+}
+async function search(q) {
+  q = q.trim(); if (!q) return;
+  $("q").value = q; sel.clear(); bar(); $("kw").value = q;
+  $("out").innerHTML = '<div class="loading"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>';
+  try {
+    last = await api(`/api/search?q=${encodeURIComponent(q)}&compare=${$("cmp").checked ? 1 : 0}`);
+    render();
+  } catch (e) { $("out").innerHTML = `<p class="empty">${esc(e.message)}</p>`; }
+}
+
+$("f").onsubmit = e => { e.preventDefault(); search($("q").value); };
+$("cmp").onchange = () => last && search(last.query);
+$("clr").onclick = () => { sel.clear(); document.querySelectorAll(".card.on").forEach(c => c.classList.remove("on")); bar(); };
+$("all").onclick = () => { last.results.forEach(r => sel.add(r.uuid)); render(); bar(); };
+$("tagbtn").onclick = async () => {
+  const kw = $("kw").value.trim(); if (!kw) return toast("Add a keyword first", "err");
+  $("tagbtn").disabled = true; $("tagbtn").textContent = "Tagging…";
+  try {
+    const r = await api("/api/tag", {keyword: kw, uuids: [...sel]});
+    toast(`Tagged ${r.tagged} photo${r.tagged === 1 ? "" : "s"} as “${r.keyword}”. Search it in Photos!`);
+    $("clr").click();
+  } catch (e) { toast(e.message, "err"); }
+  $("tagbtn").disabled = false; $("tagbtn").textContent = "Tag in Photos";
+};
+$("undo").onclick = async () => {
+  if (!confirm("Remove every keyword Alaala has added in Photos?")) return;
+  try { const r = await api("/api/undo", {}); toast(`Removed Alaala tags from ${r.removed} photos`); }
+  catch (e) { toast(e.message, "err"); }
+};
+
+(async function poll() {
+  try {
+    const s = await api("/api/status");
+    if (s.error) { $("out").innerHTML = `<p class="empty">Couldn't load: ${esc(s.error)}</p>`; return; }
+    $("chips").innerHTML = "<small>Try</small>" + s.examples.map(x => `<button class="chip">${esc(x)}</button>`).join("");
+    $("chips").querySelectorAll(".chip").forEach(b => b.onclick = () => search(b.textContent));
+    if (!s.ready) return setTimeout(poll, 600);
+    $("count").textContent = `· ${s.count.toLocaleString()} photos`;
+    $("go").disabled = false;
+    $("out").innerHTML = '<p class="empty">Search for anything. Tagalog, Taglish, or English.</p>';
+  } catch { setTimeout(poll, 800); }
+})();
+</script>
+</html>

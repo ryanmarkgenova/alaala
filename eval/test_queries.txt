@@ -1,0 +1,17 @@
+# HELD-OUT TEST SET. Don't tune the lexicon while looking at these.
+# Replace these with ~15 searches you'd really type, ones NOT in queries.txt.
+lolo and lola
+lola cooking
+tita at the beach
+pancit
+adobo
+pamilya dinner
+kids playing
+ube cake
+barkada
+merienda
+lolo at the table
+ate and kuya
+dessert
+sunset
+group photo

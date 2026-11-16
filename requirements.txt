@@ -1,0 +1,11 @@
+osxphotos>=0.78
+open_clip_torch>=4.2
+timm>=1.0.20
+torch>=2.3
+pillow
+pillow-heif
+pandas
+pyarrow
+numpy
+tqdm
+pywebview

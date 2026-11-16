@@ -1,0 +1,10 @@
+# Filipino holidays and seasons -> date windows (MM-DD, any year).
+# When a query mentions one, results are limited to photos taken in that window.
+# Windows can wrap around the new year (start > end).
+
+noche buena: ["12-24", "12-25"]
+pasko: ["12-15", "12-31"]
+simbang gabi: ["12-16", "12-24"]
+bagong taon: ["12-31", "01-01"]
+media noche: ["12-31", "01-01"]
+undas: ["10-31", "11-02"]

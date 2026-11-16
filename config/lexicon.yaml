@@ -1,0 +1,90 @@
+# Filipino / Taglish terms -> what they LOOK like in a photo.
+# The search model only really understands English, so each term gets
+# translated into 1-3 visual descriptions. Multiple descriptions are averaged
+# (a "prompt ensemble"), which is usually more robust than a single phrase.
+#
+# Add your own! If a search misses, the fix is usually a better description here.
+
+# ---- Family (also see kinship.yaml to link these to real people) ----
+lolo: [an elderly grandfather, an old man with gray hair]
+lola: [an elderly grandmother, an old woman with gray hair]
+tito: [a middle-aged man, an uncle at a family gathering]
+tita: [a middle-aged woman, an aunt at a family gathering]
+kuya: [a young man, an older brother]
+ate: [a young woman, an older sister]
+nanay: [a mother]
+mama: [a mother]
+tatay: [a father]
+papa: [a father]
+apo: [a grandparent with a grandchild]
+pinsan: [cousins posing together]
+pamilya: [a big family posing together, an extended family gathering]
+barkada: [a group of friends hanging out]
+
+# ---- Food ----
+lechon: [a whole roast pig on a table, crispy roasted pig at a party]
+pancit: [a tray of stir-fried noodles]
+lumpia: [lumpia, fried spring rolls on a plate]  # model already knows the word
+adobo: [dark braised meat in soy sauce with rice]
+halo-halo: ["a shaved ice dessert with purple ube ice cream, beans and fruit", a tall glass of colorful shaved ice dessert]
+ube: [a purple ube dessert]
+sinigang: [a bowl of sour soup with vegetables and meat]
+kare-kare: [oxtail stew in orange peanut sauce]
+sisig: [sizzling chopped pork on a hot iron plate]
+silog: [garlic fried rice with a fried egg breakfast plate]
+bibingka: [a rice cake baked in banana leaves]
+puto: [puto, small white steamed rice cakes]
+kakanin: [Filipino rice cakes on banana leaves]
+turon: [fried banana spring rolls with caramel]
+taho: [a cup of silken tofu with brown syrup and sago pearls]
+lugaw: [a bowl of rice porridge]
+leche flan: [a caramel custard flan]
+pandesal: [a bag of soft bread rolls]
+kamayan: [food spread on banana leaves eaten by hand, a boodle fight feast]
+boodle fight: [food spread on banana leaves eaten by hand]
+
+# ---- Events and moments ----
+videoke: [people singing karaoke with a microphone in front of a TV, a karaoke party at home]
+karaoke: [people singing karaoke with a microphone in front of a TV]
+kantahan: [people singing together with a microphone]
+handaan: [a home party with lots of food on the table, a family feast]
+salu-salo: [a home party with lots of food on the table]
+noche buena: [a family Christmas Eve dinner feast]
+pasko: [a family Christmas celebration, a Christmas tree and decorations]
+simbang gabi: [people at church at night, a Christmas mass]
+bagong taon: [New Year's Eve celebration with fireworks]
+media noche: [a New Year's Eve midnight family feast]
+undas: [visiting graves at a cemetery with candles and flowers]
+debut: [an 18th birthday formal party, a young woman in a ball gown dancing]
+binyag: [a baby baptism at church]
+kasal: [a wedding ceremony]
+fiesta: [a town fiesta with colorful decorations and crowds]
+mano: [a young person pressing an elder's hand to their forehead]
+tinikling: [dancers stepping between bamboo poles]
+
+# ---- Things and places ----
+parol: [a star-shaped Christmas lantern, a glowing star lantern]
+barong: [a man wearing a sheer embroidered barong tagalog shirt]
+filipiniana: [a woman in a filipiniana dress with butterfly sleeves]
+jeepney: [a colorful jeepney on the street]
+tricycle: [a motorized tricycle with a sidecar]
+balikbayan box: [large cardboard boxes packed for shipping]
+palengke: [a crowded wet market with fresh produce and fish]
+sari-sari: [a small neighborhood convenience store window]
+simbahan: [inside a Catholic church]
+bahay kubo: [a nipa hut made of bamboo and palm leaves]
+dagat: [the ocean and beach]
+probinsya: [a rural Philippine province with palm trees]
+
+# ---- Added from your eval list ----
+ensaymada: [a soft brioche bun topped with butter sugar and grated cheese]
+ensemada: [a soft brioche bun topped with butter sugar and grated cheese]
+pagkain: [a table full of Filipino food, plates of food]
+kanin: [a bowl of white rice, a plate with white rice]
+inasal: [grilled chicken inasal with orange glaze, grilled chicken with rice]
+bangus: [fried milkfish on a plate]
+tocino: [sweet red cured pork with rice and egg]
+red hotdog: [red hotdog, bright red Filipino hotdogs, Filipino spaghetti with sliced red hotdogs]
+jollibee: [Jollibee fried chicken and spaghetti meal, a fast food restaurant with red and yellow signs]
+jolibee: [Jollibee fried chicken and spaghetti meal, a fast food restaurant with red and yellow signs]
+fruitas: [Fruitas, a Fruitas fruit shake cup with logo, a fresh fruit shake in a plastic cup]  # brand: CLIP can read logos

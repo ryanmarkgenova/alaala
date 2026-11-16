@@ -1,0 +1,88 @@
+query,type,method,Hit@1,Recall@10,nDCG@10,MRR
+halo-halo,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.058823529411764705
+halo-halo,Filipino term,Alaala v1 (descriptions only),1.0,1.0,0.9668342083190152,1.0
+halo-halo,Filipino term,Alaala v2 (+ original word),1.0,1.0,0.975788054854922,1.0
+ensemada,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.0
+ensemada,Filipino term,Alaala v1 (descriptions only),1.0,0.8333333333333334,0.8331636716948343,1.0
+ensemada,Filipino term,Alaala v2 (+ original word),1.0,0.8333333333333334,0.8534811121179371,1.0
+lolo,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.047619047619047616
+lolo,Filipino term,Alaala v1 (descriptions only),1.0,0.6,0.933745776545611,1.0
+lolo,Filipino term,Alaala v2 (+ original word),1.0,0.5333333333333333,0.8572048559638626,1.0
+lola,Filipino term,Baseline (plain CLIP),1.0,0.3333333333333333,0.5669450709942981,1.0
+lola,Filipino term,Alaala v1 (descriptions only),1.0,0.4,0.6987957033953601,1.0
+lola,Filipino term,Alaala v2 (+ original word),1.0,0.4,0.7084409501232899,1.0
+tita,Filipino term,Baseline (plain CLIP),0.0,0.3333333333333333,0.19195987438972922,0.14285714285714285
+tita,Filipino term,Alaala v1 (descriptions only),0.0,0.16666666666666666,0.15130120674940675,0.3333333333333333
+tita,Filipino term,Alaala v2 (+ original word),0.0,0.16666666666666666,0.1909208661789347,0.5
+tito,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.02127659574468085
+tito,Filipino term,Alaala v1 (descriptions only),0.0,0.6666666666666666,0.431733884398313,0.5
+tito,Filipino term,Alaala v2 (+ original word),0.0,0.6666666666666666,0.4441228664487979,0.5
+kuya,Filipino term,Baseline (plain CLIP),0.0,0.42857142857142855,0.35922141745123676,0.5
+kuya,Filipino term,Alaala v1 (descriptions only),1.0,0.42857142857142855,0.4799729543637735,1.0
+kuya,Filipino term,Alaala v2 (+ original word),1.0,0.42857142857142855,0.5350178183966501,1.0
+ate,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.0
+ate,Filipino term,Alaala v1 (descriptions only),0.0,0.8333333333333334,0.5681128288016104,0.3333333333333333
+ate,Filipino term,Alaala v2 (+ original word),0.0,0.8333333333333334,0.5627057907248066,0.3333333333333333
+pagkain,Filipino term,Baseline (plain CLIP),1.0,0.32,0.8165901947515999,1.0
+pagkain,Filipino term,Alaala v1 (descriptions only),1.0,0.4,1.0,1.0
+pagkain,Filipino term,Alaala v2 (+ original word),1.0,0.4,1.0,1.0
+taho,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.0
+taho,Filipino term,Alaala v1 (descriptions only),0.0,0.5,0.2640681225725909,0.25
+taho,Filipino term,Alaala v2 (+ original word),0.0,0.5,0.18457569677956817,0.1111111111111111
+ice cream,English,Baseline (plain CLIP),1.0,1.0,0.8854598815714874,1.0
+ice cream,English,Alaala v1 (descriptions only),1.0,1.0,0.8854598815714874,1.0
+ice cream,English,Alaala v2 (+ original word),1.0,1.0,0.8854598815714874,1.0
+bibingka,Filipino term,Baseline (plain CLIP),0.0,1.0,0.5706417189553201,0.3333333333333333
+bibingka,Filipino term,Alaala v1 (descriptions only),1.0,1.0,1.0,1.0
+bibingka,Filipino term,Alaala v2 (+ original word),1.0,1.0,0.9197207891481876,1.0
+buffet,English,Baseline (plain CLIP),1.0,0.5,0.8701249883466592,1.0
+buffet,English,Alaala v1 (descriptions only),1.0,0.5,0.8701249883466592,1.0
+buffet,English,Alaala v2 (+ original word),1.0,0.5,0.8701249883466592,1.0
+inasal,Filipino term,Baseline (plain CLIP),1.0,0.75,0.7495275800817669,1.0
+inasal,Filipino term,Alaala v1 (descriptions only),1.0,1.0,0.9178287402913374,1.0
+inasal,Filipino term,Alaala v2 (+ original word),1.0,1.0,0.9223260797603763,1.0
+fruitas,Filipino term,Baseline (plain CLIP),0.0,1.0,0.6934264036172708,0.5
+fruitas,Filipino term,Alaala v1 (descriptions only),0.0,1.0,0.4227898344066503,0.16666666666666666
+fruitas,Filipino term,Alaala v2 (+ original word),0.0,1.0,0.4415801103577823,0.2
+lumpia,Filipino term,Baseline (plain CLIP),1.0,1.0,0.9010126104210695,1.0
+lumpia,Filipino term,Alaala v1 (descriptions only),0.0,0.6666666666666666,0.5307212739772434,0.5
+lumpia,Filipino term,Alaala v2 (+ original word),0.0,0.6666666666666666,0.5307212739772434,0.5
+kanin,Filipino term,Baseline (plain CLIP),0.0,0.25,0.2574406717600568,0.5
+kanin,Filipino term,Alaala v1 (descriptions only),1.0,0.875,0.9021484053648395,1.0
+kanin,Filipino term,Alaala v2 (+ original word),1.0,0.875,0.9098999913476322,1.0
+pamilya,Filipino term,Baseline (plain CLIP),1.0,0.25806451612903225,0.8643145546088337,1.0
+pamilya,Filipino term,Alaala v1 (descriptions only),1.0,0.3225806451612903,1.0,1.0
+pamilya,Filipino term,Alaala v2 (+ original word),1.0,0.3225806451612903,1.0,1.0
+lola sa beach,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.03125
+lola sa beach,Filipino term,Alaala v1 (descriptions only),1.0,1.0,1.0,1.0
+lola sa beach,Filipino term,Alaala v2 (+ original word),1.0,1.0,0.8315546295836225,1.0
+lolo smiling,Filipino term,Baseline (plain CLIP),0.0,0.0,0.0,0.08333333333333333
+lolo smiling,Filipino term,Alaala v1 (descriptions only),0.0,1.0,0.5249810332008933,0.3333333333333333
+lolo smiling,Filipino term,Alaala v2 (+ original word),0.0,1.0,0.5,0.3333333333333333
+cousins,English,Baseline (plain CLIP),0.0,0.6666666666666666,0.33775931993299535,0.25
+cousins,English,Alaala v1 (descriptions only),0.0,0.6666666666666666,0.33775931993299535,0.25
+cousins,English,Alaala v2 (+ original word),0.0,0.6666666666666666,0.33775931993299535,0.25
+kakanin,Filipino term,Baseline (plain CLIP),0.0,0.16666666666666666,0.10778915452451095,0.16666666666666666
+kakanin,Filipino term,Alaala v1 (descriptions only),0.0,0.6666666666666666,0.5601521372325762,0.5
+kakanin,Filipino term,Alaala v2 (+ original word),0.0,0.6666666666666666,0.5385499771840799,0.5
+puto,Filipino term,Baseline (plain CLIP),0.0,1.0,0.5012658353418871,0.25
+puto,Filipino term,Alaala v1 (descriptions only),0.0,1.0,0.45560514958746035,0.2
+puto,Filipino term,Alaala v2 (+ original word),0.0,1.0,0.45560514958746035,0.2
+ube,Filipino term,Baseline (plain CLIP),1.0,0.8333333333333334,0.7796228390769658,1.0
+ube,Filipino term,Alaala v1 (descriptions only),1.0,1.0,0.8896291645642339,1.0
+ube,Filipino term,Alaala v2 (+ original word),1.0,0.8333333333333334,0.7928840118493731,1.0
+cheese,English,Baseline (plain CLIP),1.0,1.0,1.0,1.0
+cheese,English,Alaala v1 (descriptions only),1.0,1.0,1.0,1.0
+cheese,English,Alaala v2 (+ original word),1.0,1.0,1.0,1.0
+red hotdog,Filipino term,Baseline (plain CLIP),0.0,1.0,0.5,0.3333333333333333
+red hotdog,Filipino term,Alaala v1 (descriptions only),0.0,1.0,0.43067655807339306,0.25
+red hotdog,Filipino term,Alaala v2 (+ original word),0.0,1.0,0.43067655807339306,0.25
+fried rice,English,Baseline (plain CLIP),0.0,1.0,0.48247555939075504,0.25
+fried rice,English,Alaala v1 (descriptions only),0.0,1.0,0.48247555939075504,0.25
+fried rice,English,Alaala v2 (+ original word),0.0,1.0,0.48247555939075504,0.25
+beach,English,Baseline (plain CLIP),1.0,0.5,0.6004833831800817,1.0
+beach,English,Alaala v1 (descriptions only),1.0,0.5,0.6004833831800817,1.0
+beach,English,Alaala v2 (+ original word),1.0,0.5,0.6004833831800817,1.0
+swimming,English,Baseline (plain CLIP),1.0,1.0,1.0,1.0
+swimming,English,Alaala v1 (descriptions only),1.0,1.0,1.0,1.0
+swimming,English,Alaala v2 (+ original word),1.0,1.0,1.0,1.0
